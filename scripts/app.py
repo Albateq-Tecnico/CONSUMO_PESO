@@ -31,8 +31,8 @@ sexos = sorted(df_cons_peso['SEXO'].unique())
 raza = st.selectbox('Seleccione la Raza (Línea Genética):', razas)
 sexo = st.selectbox('Seleccione el Sexo:', sexos)
 dia = st.number_input('Día', min_value=14, value=14)
-consumo_real = st.number_input('Consumo Acumulado Real', min_value=0.0, value=0.0)
-peso_real = st.number_input('Peso Real', min_value=0.0, value=0.0)
+consumo_real = st.number_input('Consumo Acumulado Real', min_value=0.01, value=0.01)
+peso_real = st.number_input('Peso Real', min_value=0.01, value=0.01)
 
 def get_poly_coeffs(df, raza, sexo):
     row = df[(df['RAZA'] == raza) & (df['SEXO'] == sexo)].iloc[0]
@@ -74,7 +74,6 @@ if st.button('Generar Informe'):
 
     # Gráfico 1: Consumo Acumulado Estimado vs Real por Día
     fig1, ax1 = plt.subplots()
-    # Limitar eje X hasta dia+15
     dias = np.linspace(14, dia+15, 100)
     cons_estimados = predict_poly(coeffs_dia_cons, dias)
     ax1.plot(dias, cons_estimados, 'r-', label='Consumo Acumulado Estimado')
@@ -93,8 +92,7 @@ if st.button('Generar Informe'):
 
     # Gráfico 2: Peso Estimado vs Real por Cons Acumulado
     fig2, ax2 = plt.subplots()
-    # Limitar eje X hasta consumo_real+1000
-    cons_min = min(0, consumo_real)
+    cons_min = 0
     cons_max = consumo_real + 1000
     cons_range = np.linspace(cons_min, cons_max, 100)
     pesos_estimados = predict_poly(coeffs_cons_peso, cons_range)
