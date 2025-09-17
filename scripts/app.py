@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,8 +19,6 @@ def load_csv(path):
 
 df_cons_peso = load_csv(CSV_CONS_PESO)
 df_dia_cons = load_csv(CSV_DIA_CONS)
-
-# Load logo
 logo = Image.open(LOGO_PATH)
 
 # UI
@@ -27,70 +26,86 @@ st.image(logo, width=120)
 st.title('ALBATEQ S. A. - Dirección Técnica')
 st.subheader('Cálculos de Consumos vs la Línea Genética y Peso Estimado de Acuerdo al Consumo Real en granjas.')
 
-# Selectors
-
 razas = sorted(df_cons_peso['RAZA'].unique())
 sexos = sorted(df_cons_peso['SEXO'].unique())
 raza = st.selectbox('Seleccione la Raza (Línea Genética):', razas)
 sexo = st.selectbox('Seleccione el Sexo:', sexos)
-
 dia = st.number_input('Día', min_value=0, value=0)
 consumo_real = st.number_input('Consumo Acumulado Real', min_value=0.0, value=0.0)
 peso_real = st.number_input('Peso Real', min_value=0.0, value=0.0)
 
-# Filtrar coeficientes
-
 def get_poly_coeffs(df, raza, sexo):
     row = df[(df['RAZA'] == raza) & (df['SEXO'] == sexo)].iloc[0]
-    return [row[f'coef_{i}'] for i in range(4, -1, -1)]  # coef_4 ... coef_0
+
+    return [row[f'coef_{i}'] for i in range(4, -1, -1)]
 
 def predict_poly(coeffs, x):
     return np.polyval(coeffs, x)
 
-# Cálculos
-coeffs_dia_cons = get_poly_coeffs(df_dia_cons, raza, sexo)
-consumo_estimado = predict_poly(coeffs_dia_cons, dia)
+if st.button('Generar Informe'):
+    # Cálculos
+    coeffs_dia_cons = get_poly_coeffs(df_dia_cons, raza, sexo)
+    consumo_estimado = predict_poly(coeffs_dia_cons, dia)
+    coeffs_cons_peso = get_poly_coeffs(df_cons_peso, raza, sexo)
+    peso_estimado = predict_poly(coeffs_cons_peso, consumo_real)
 
-coeffs_cons_peso = get_poly_coeffs(df_cons_peso, raza, sexo)
-peso_estimado = predict_poly(coeffs_cons_peso, consumo_real)
+    diff_cons = consumo_real - consumo_estimado
+    pct_diff_cons = 100 * diff_cons / consumo_estimado if consumo_estimado else 0
+    diff_peso = peso_real - peso_estimado
+    pct_diff_peso = 100 * diff_peso / peso_estimado if peso_estimado else 0
+    conversion = consumo_real / peso_real if peso_real else 0
 
-diff_cons = consumo_real - consumo_estimado
-pct_diff_cons = 100 * diff_cons / consumo_estimado if consumo_estimado else 0
+    st.markdown('---')
+    st.header('Resultados')
+    st.markdown(f"""
+    **Consumo Acumulado Estimado para Día {dia}:** {consumo_estimado:.2f}  
+    **Consumo Acumulado Real Ingresado:** {consumo_real:.2f}  
+    **Diferencia Consumo Acumulado (real - estimado):** {diff_cons:.2f} ({pct_diff_cons:.2f}%)
+    
+    ---
+    **Peso Estimado para Consumo Acumulado {consumo_real}:** {peso_estimado:.2f}  
+    **Peso Real ingresado:** {peso_real:.2f}  
+    **Diferencia Peso (real - estimado):** {diff_peso:.2f} ({pct_diff_peso:.2f}%)
+    
+    ---
+    **Conversión Alimenticia:** {conversion:.2f}
+    """)
 
-diff_peso = peso_real - peso_estimado
-pct_diff_peso = 100 * diff_peso / peso_estimado if peso_estimado else 0
+    # Gráfico 1: Consumo Acumulado Estimado vs Real por Día
+    fig1, ax1 = plt.subplots()
+    # Curva estimada
+    dias = np.linspace(0, max(45, dia+5), 100)
+    cons_estimados = predict_poly(coeffs_dia_cons, dias)
+    ax1.plot(dias, cons_estimados, 'r-', label='Consumo Acumulado Estimado')
+    # Punto real
+    ax1.plot([dia], [consumo_real], 'bo', label='Consumo Acumulado Real (input)')
+    # Punto estimado
+    ax1.plot([dia], [consumo_estimado], 'gx', markersize=10, label='Consumo Acumulado Estimado (input)')
+    ax1.set_xlabel('Día')
+    ax1.set_ylabel('Consumo Acumulado')
+    ax1.set_title('Consumo Acumulado Estimado vs Real por Día')
+    ax1.legend()
+    # Marca de agua
+    ax1.imshow(logo, aspect='auto', extent=(ax1.get_xlim()[0], ax1.get_xlim()[1], ax1.get_ylim()[0], ax1.get_ylim()[1]), alpha=0.15, zorder=-1)
+    st.pyplot(fig1)
 
-conversion = consumo_real / peso_real if peso_real else 0
+    # Gráfico 2: Peso Estimado vs Real por Cons Acumulado
+    fig2, ax2 = plt.subplots()
+    # Curva estimada
+    cons_range = np.linspace(0, max(5000, consumo_real+500), 100)
+    pesos_estimados = predict_poly(coeffs_cons_peso, cons_range)
+    ax2.plot(cons_range, pesos_estimados, color='orange', label='Peso Estimado')
+    # Punto real
+    ax2.plot([consumo_real], [peso_real], 'bo', label='Peso Real (input)')
+    # Punto estimado
+    ax2.plot([consumo_real], [peso_estimado], 'gx', markersize=10, label='Peso estimado (input)')
+    ax2.set_xlabel('Consumo Acumulado')
+    ax2.set_ylabel('Peso')
+    ax2.set_title('Peso Estimado vs Real por Cons Acumulado')
+    ax2.legend()
+    # Marca de agua
+    ax2.imshow(logo, aspect='auto', extent=(ax2.get_xlim()[0], ax2.get_xlim()[1], ax2.get_ylim()[0], ax2.get_ylim()[1]), alpha=0.15, zorder=-1)
+    st.pyplot(fig2)
 
-# Resultados
-st.markdown('---')
-st.header('Resultados')
-st.write(f"Consumo Acumulado Estimado: {consumo_estimado:.2f}")
-st.write(f"Peso Estimado: {peso_estimado:.2f}")
-st.write(f"Diferencia Consumo (abs): {diff_cons:.2f} | (%) {pct_diff_cons:.2f}%")
-st.write(f"Diferencia Peso (abs): {diff_peso:.2f} | (%) {pct_diff_peso:.2f}%")
-st.write(f"Conversión Alimenticia: {conversion:.2f}")
-
-# Gráficos
-fig1, ax1 = plt.subplots()
-ax1.plot([dia], [consumo_real], 'ro', label='Consumo Real')
-ax1.plot([dia], [consumo_estimado], 'bo', label='Consumo Estimado')
-ax1.set_xlabel('Día')
-ax1.set_ylabel('Consumo Acumulado')
-ax1.legend()
-ax1.set_title('Consumo Acumulado vs. Día')
-ax1.imshow(logo, aspect='auto', extent=(ax1.get_xlim()[0], ax1.get_xlim()[1], ax1.get_ylim()[0], ax1.get_ylim()[1]), alpha=0.15, zorder=-1)
-st.pyplot(fig1)
-
-fig2, ax2 = plt.subplots()
-ax2.plot([consumo_real], [peso_real], 'ro', label='Peso Real')
-ax2.plot([consumo_real], [peso_estimado], 'bo', label='Peso Estimado')
-ax2.set_xlabel('Consumo Acumulado Real')
-ax2.set_ylabel('Peso')
-ax2.legend()
-ax2.set_title('Peso vs. Consumo Acumulado')
-ax2.imshow(logo, aspect='auto', extent=(ax2.get_xlim()[0], ax2.get_xlim()[1], ax2.get_ylim()[0], ax2.get_ylim()[1]), alpha=0.15, zorder=-1)
-st.pyplot(fig2)
-
-st.markdown('---')
-st.caption('Se ofrece como ayuda para cálculos a nivel de granja, úsela bajo su criterio.')
+    st.markdown('---')
+    st.caption('Se ofrece como ayuda para cálculos a nivel de granja, úsela bajo su criterio.')
