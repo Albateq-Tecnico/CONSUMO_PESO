@@ -30,7 +30,7 @@ razas = sorted(df_cons_peso['RAZA'].unique())
 sexos = sorted(df_cons_peso['SEXO'].unique())
 raza = st.selectbox('Seleccione la Raza (Línea Genética):', razas)
 sexo = st.selectbox('Seleccione el Sexo:', sexos)
-dia = st.number_input('Día', min_value=0, value=0)
+dia = st.number_input('Día', min_value=14, value=14)
 consumo_real = st.number_input('Consumo Acumulado Real', min_value=0.0, value=0.0)
 peso_real = st.number_input('Peso Real', min_value=0.0, value=0.0)
 
