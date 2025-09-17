@@ -77,9 +77,14 @@ if st.button('Generar Informe'):
     dia_min = dia - 3
     dia_max = dia + 3
     tabla_filtrada = df_rch[(df_rch['RAZA'] == raza) & (df_rch['SEXO'] == sexo) & (df_rch['Dia'] >= dia_min) & (df_rch['Dia'] <= dia_max)]
-    tabla_filtrada = tabla_filtrada[['Dia', 'Peso', 'Cons_Acum']].sort_values('Dia')
-    st.markdown('**Tabla de referencia (±3 días):**')
-    st.dataframe(tabla_filtrada.reset_index(drop=True), hide_index=True)
+    tabla_filtrada = tabla_filtrada[['Dia', 'Peso', 'Cons_Acum']].sort_values('Dia').reset_index(drop=True)
+    # Título personalizado
+    st.markdown(f"**Valores de la Linea Genetica {raza} y {sexo} para el Día {dia}**")
+    # Estilo para la columna 'Dia' en gris
+    def highlight_dia(s):
+        return ['background-color: #e0e0e0' if s.name == 'Dia' else '' for _ in s]
+    styled_tabla = tabla_filtrada.style.apply(lambda x: ['background-color: #e0e0e0' if x.name == 'Dia' else '' for _ in x], axis=0)
+    st.dataframe(styled_tabla, hide_index=True)
 
     # Gráfico 1: Consumo Acumulado Estimado vs Real por Día
     fig1, ax1 = plt.subplots()
