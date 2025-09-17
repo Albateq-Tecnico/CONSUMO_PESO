@@ -127,3 +127,4 @@ if st.button('Generar Informe'):
 
     st.markdown('---')
     st.caption('Herramienta para apoyo en granja. Uso bajo su exclusiva responsabilidad. No sustituye la asesoría profesional y Albateq S.A. no se responsabiliza por las decisiones tomadas con base en ellos.')
+    st.markdown('<div style="text-align:center; color:gray; font-size:small;">Investigación y desarrollo: <a href="mailto:dtecnico@albateq.com">dtecnico@albateq.com</a></div>', unsafe_allow_html=True)
