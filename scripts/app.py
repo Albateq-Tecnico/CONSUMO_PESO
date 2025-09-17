@@ -11,6 +11,7 @@ COEF_DIR = os.path.join(os.path.dirname(__file__), '..', 'COEFICIENTES')
 CSV_CONS_PESO = os.path.join(COEF_DIR, 'resultados_cons_vs_peso.csv')
 CSV_DIA_CONS = os.path.join(COEF_DIR, 'resultados_dia_vs_cons.csv')
 LOGO_PATH = os.path.join(COEF_DIR, 'logo mejorado_PEQ.png')
+CSV_RCH = os.path.join(COEF_DIR, 'ROSS_COBB_HUBBARD_2025.csv')
 
 # Load data
 @st.cache_data
@@ -20,6 +21,7 @@ def load_csv(path):
 df_cons_peso = load_csv(CSV_CONS_PESO)
 df_dia_cons = load_csv(CSV_DIA_CONS)
 logo = Image.open(LOGO_PATH)
+df_rch = pd.read_csv(CSV_RCH, sep=';')
 
 # UI
 st.image(logo, width=120)
@@ -71,6 +73,13 @@ if st.button('Generar Informe'):
     **Conversión Alimenticia:** {conversion:.2f}
     """)
 
+    # Tabla filtrada de ROSS_COBB_HUBBARD_2025.csv
+    dia_min = dia - 3
+    dia_max = dia + 3
+    tabla_filtrada = df_rch[(df_rch['RAZA'] == raza) & (df_rch['SEXO'] == sexo) & (df_rch['Dia'] >= dia_min) & (df_rch['Dia'] <= dia_max)]
+    tabla_filtrada = tabla_filtrada[['Dia', 'Peso', 'Cons_Acum']].sort_values('Dia')
+    st.markdown('**Tabla de referencia (±3 días):**')
+    st.dataframe(tabla_filtrada.reset_index(drop=True), hide_index=True)
 
     # Gráfico 1: Consumo Acumulado Estimado vs Real por Día
     fig1, ax1 = plt.subplots()
