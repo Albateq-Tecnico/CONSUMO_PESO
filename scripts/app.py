@@ -85,6 +85,7 @@ if st.button('Generar Informe'):
     ax1.set_ylabel('Consumo Acumulado')
     ax1.set_title('Consumo Acumulado Estimado vs Real por Día')
     ax1.set_xlim(7, dia+15)
+    ax1.set_xticks(np.arange(7, dia+16, 1))
     ax1.legend()
     # Marca de agua
     ax1.imshow(logo, aspect='auto', extent=(ax1.get_xlim()[0], ax1.get_xlim()[1], ax1.get_ylim()[0], ax1.get_ylim()[1]), alpha=0.15, zorder=-1)
