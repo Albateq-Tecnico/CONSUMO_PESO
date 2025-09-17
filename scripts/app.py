@@ -71,10 +71,11 @@ if st.button('Generar Informe'):
     **Conversión Alimenticia:** {conversion:.2f}
     """)
 
+
     # Gráfico 1: Consumo Acumulado Estimado vs Real por Día
     fig1, ax1 = plt.subplots()
-    # Curva estimada
-    dias = np.linspace(0, max(45, dia+5), 100)
+    # Limitar eje X hasta dia+15
+    dias = np.linspace(14, dia+15, 100)
     cons_estimados = predict_poly(coeffs_dia_cons, dias)
     ax1.plot(dias, cons_estimados, 'r-', label='Consumo Acumulado Estimado')
     # Punto real
@@ -84,6 +85,7 @@ if st.button('Generar Informe'):
     ax1.set_xlabel('Día')
     ax1.set_ylabel('Consumo Acumulado')
     ax1.set_title('Consumo Acumulado Estimado vs Real por Día')
+    ax1.set_xlim(14, dia+15)
     ax1.legend()
     # Marca de agua
     ax1.imshow(logo, aspect='auto', extent=(ax1.get_xlim()[0], ax1.get_xlim()[1], ax1.get_ylim()[0], ax1.get_ylim()[1]), alpha=0.15, zorder=-1)
@@ -91,8 +93,10 @@ if st.button('Generar Informe'):
 
     # Gráfico 2: Peso Estimado vs Real por Cons Acumulado
     fig2, ax2 = plt.subplots()
-    # Curva estimada
-    cons_range = np.linspace(0, max(5000, consumo_real+500), 100)
+    # Limitar eje X hasta consumo_real+1000
+    cons_min = min(0, consumo_real)
+    cons_max = consumo_real + 1000
+    cons_range = np.linspace(cons_min, cons_max, 100)
     pesos_estimados = predict_poly(coeffs_cons_peso, cons_range)
     ax2.plot(cons_range, pesos_estimados, color='orange', label='Peso Estimado')
     # Punto real
@@ -102,6 +106,7 @@ if st.button('Generar Informe'):
     ax2.set_xlabel('Consumo Acumulado')
     ax2.set_ylabel('Peso')
     ax2.set_title('Peso Estimado vs Real por Cons Acumulado')
+    ax2.set_xlim(cons_min, cons_max)
     ax2.legend()
     # Marca de agua
     ax2.imshow(logo, aspect='auto', extent=(ax2.get_xlim()[0], ax2.get_xlim()[1], ax2.get_ylim()[0], ax2.get_ylim()[1]), alpha=0.15, zorder=-1)
