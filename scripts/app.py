@@ -74,7 +74,7 @@ if st.button('Generar Informe'):
 
     # Gráfico 1: Consumo Acumulado Estimado vs Real por Día
     fig1, ax1 = plt.subplots()
-    dias = np.linspace(14, dia+15, 100)
+    dias = np.linspace(7, dia+15, 100)
     cons_estimados = predict_poly(coeffs_dia_cons, dias)
     ax1.plot(dias, cons_estimados, 'r-', label='Consumo Acumulado Estimado')
     # Punto real
@@ -84,7 +84,7 @@ if st.button('Generar Informe'):
     ax1.set_xlabel('Día')
     ax1.set_ylabel('Consumo Acumulado')
     ax1.set_title('Consumo Acumulado Estimado vs Real por Día')
-    ax1.set_xlim(14, dia+15)
+    ax1.set_xlim(7, dia+15)
     ax1.legend()
     # Marca de agua
     ax1.imshow(logo, aspect='auto', extent=(ax1.get_xlim()[0], ax1.get_xlim()[1], ax1.get_ylim()[0], ax1.get_ylim()[1]), alpha=0.15, zorder=-1)
