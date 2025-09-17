@@ -74,7 +74,7 @@ if st.button('Generar Informe'):
 
     # Gráfico 1: Consumo Acumulado Estimado vs Real por Día
     fig1, ax1 = plt.subplots()
-    dias = np.linspace(7, dia+15, 100)
+    dias = np.arange(7, dia+16, 1)
     cons_estimados = predict_poly(coeffs_dia_cons, dias)
     ax1.plot(dias, cons_estimados, 'r-', label='Consumo Acumulado Estimado')
     # Punto real
