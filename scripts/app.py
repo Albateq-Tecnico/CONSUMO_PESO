@@ -108,4 +108,4 @@ if st.button('Generar Informe'):
     st.pyplot(fig2)
 
     st.markdown('---')
-    st.caption('Se ofrece como ayuda para cálculos a nivel de granja, úsela bajo su criterio.')
+    st.caption('Herramienta para apoyo en granja. Uso bajo su exclusiva responsabilidad. No sustituye la asesoría profesional y Albateq S.A. no se responsabiliza por las decisiones tomadas con base en ellos.')
